@@ -36,7 +36,7 @@ public class MesaOperacoesController {
         } catch (Exception e) {
             System.err.println("[MESA DE OPERACOES] Plataforma de Credito indisponivel via Feign Client: " + e.getMessage());
             solicitacoes = new ArrayList<>();
-            model.addAttribute("warning", "Aviso: Nao foi possivel conectar a Plataforma de Credito. Exibindo modo offline.");
+            model.addAttribute("warning", "Aviso: Nao foi possivel conectar a Plataforma de Credito. Tente novamente em instantes.");
         }
 
         long totalCount = solicitacoes.size();
@@ -90,7 +90,7 @@ public class MesaOperacoesController {
             plataformaClient.aprovarSolicitacao(new AprovarSolicitacaoRequestDTO(solicitacaoId, parecerOperador));
             return "redirect:/dashboard?success=Solicitacao+" + solicitacaoId + "+APROVADA+com+sucesso!";
         } catch (Exception e) {
-            return "redirect:/dashboard?error=Erro+ao+aprovar+solicitacao:+" + e.getMessage();
+            return "redirect:/dashboard?error=Nao+foi+possivel+aprovar.+Atualize+a+lista+e+tente+novamente.";
         }
     }
 
@@ -101,7 +101,7 @@ public class MesaOperacoesController {
             plataformaClient.reprovarSolicitacao(new ReprovarSolicitacaoRequestDTO(solicitacaoId, motivoReprovacao));
             return "redirect:/dashboard?success=Solicitacao+" + solicitacaoId + "+REPROVADA+com+sucesso!";
         } catch (Exception e) {
-            return "redirect:/dashboard?error=Erro+ao+reprovar+solicitacao:+" + e.getMessage();
+            return "redirect:/dashboard?error=Nao+foi+possivel+reprovar.+Atualize+a+lista+e+tente+novamente.";
         }
     }
 }

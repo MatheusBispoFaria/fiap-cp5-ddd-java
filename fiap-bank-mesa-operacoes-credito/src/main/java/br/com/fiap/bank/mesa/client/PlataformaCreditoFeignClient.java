@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "plataformaCreditoClient", url = "${plataforma.credito.url:http://localhost:8081}")
+@FeignClient(name = "plataformaCreditoClient", url = "${plataforma.credito.url:http://localhost:8080}")
 public interface PlataformaCreditoFeignClient {
 
     @PostMapping("/api/credito/listarTodasSolicitacoes")

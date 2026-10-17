@@ -199,13 +199,13 @@
                                     <i class="fa-solid fa-chart-line text-info"></i>
                                 </div>
                                 <h3 class="fw-bold my-2 text-info" th:text="${solicitacao.scoreBureau} + ' pts'">750 pts</h3>
-                                <small class="text-muted">Consulta realizada no Bureau externo (Serasa/SPC)</small>
+                                <small class="text-muted">Consulta simulada ao Bureau de Crédito</small>
                             </div>
                         </div>
 
                         <!-- SCR Banco Central -->
                         <div class="col-md-6">
-                            <div class="metric-box" [ngClass]="solicitacao.scrRestricoes ? 'border-danger' : 'border-success'">
+                            <div class="metric-box" th:classappend="${solicitacao.scrRestricoes} ? 'border-danger' : 'border-success'">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="text-muted small">Sistema Banco Central (SCR)</span>
                                     <i class="fa-solid fa-building-columns text-warning"></i>
@@ -214,7 +214,7 @@
                                     <span th:if="${solicitacao.scrRestricoes}" class="badge bg-danger fs-6"><i class="fa-solid fa-triangle-exclamation me-1"></i> Restrição Encontrada</span>
                                     <span th:unless="${solicitacao.scrRestricoes}" class="badge bg-success fs-6"><i class="fa-solid fa-check me-1"></i> Sem Restrições Vencidas</span>
                                 </div>
-                                <small class="text-muted d-block mt-2">Histórico de endividamento em IFFs</small>
+                                <small class="text-muted d-block mt-2">Consulta SCR simulada para demonstração</small>
                             </div>
                         </div>
                     </div>
