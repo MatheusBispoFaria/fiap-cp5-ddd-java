@@ -1,4 +1,4 @@
-package br.com.fiap.bank.plataforma.client;
+package br.com.fiap.bank.plataforma.infrastructure.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
