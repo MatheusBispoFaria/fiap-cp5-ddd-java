@@ -6,9 +6,9 @@ import java.time.LocalDate;
 public class Cliente {
 
     private Long id;
-    private String cpf;
+    private Cpf cpf;
     private String nome;
-    private String email;
+    private Email email;
     private LocalDate dataNascimento;
     private BigDecimal rendaMensal;
 
@@ -19,9 +19,9 @@ public class Cliente {
                    String email, LocalDate dataNascimento,
                    BigDecimal rendaMensal) {
         this.id = id;
-        this.cpf = cpf;
+        this.cpf = new Cpf(cpf);
         this.nome = nome;
-        this.email = email;
+        this.email = new Email(email);
         this.dataNascimento = dataNascimento;
         this.rendaMensal = rendaMensal;
     }
@@ -35,11 +35,11 @@ public class Cliente {
     }
 
     public String getCpf() {
-        return cpf;
+        return cpf.valor();
     }
 
     public void setCpf(String cpf) {
-        this.cpf = cpf;
+        this.cpf = new Cpf(cpf);
     }
 
     public String getNome() {
@@ -51,11 +51,11 @@ public class Cliente {
     }
 
     public String getEmail() {
-        return email;
+        return email.valor();
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = new Email(email);
     }
 
     public LocalDate getDataNascimento() {

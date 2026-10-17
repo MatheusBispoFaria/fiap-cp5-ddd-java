@@ -1,10 +1,16 @@
 package br.com.fiap.bank.core.infrastructure.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "tb_cliente")
 public class ClienteEntity {
@@ -31,54 +37,4 @@ public class ClienteEntity {
             scale = 2)
     private BigDecimal rendaMensal;
 
-    public ClienteEntity() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public LocalDate getDataNascimento() {
-        return dataNascimento;
-    }
-
-    public void setDataNascimento(LocalDate dataNascimento) {
-        this.dataNascimento = dataNascimento;
-    }
-
-    public BigDecimal getRendaMensal() {
-        return rendaMensal;
-    }
-
-    public void setRendaMensal(BigDecimal rendaMensal) {
-        this.rendaMensal = rendaMensal;
-    }
 }

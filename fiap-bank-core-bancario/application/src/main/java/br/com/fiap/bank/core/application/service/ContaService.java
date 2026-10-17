@@ -198,19 +198,6 @@ public class ContaService {
 
     // Remover mascara do CPF
     private String normalizarCpf(String cpf) {
-
-        if (cpf == null) {
-            throw new IllegalArgumentException(
-                    "O CPF e obrigatorio.");
-        }
-
-        String cpfLimpo = cpf.replaceAll("\\D", "");
-
-        if (cpfLimpo.length() != 11) {
-            throw new IllegalArgumentException(
-                    "O CPF deve possuir 11 digitos.");
-        }
-
-        return cpfLimpo;
+        return new br.com.fiap.bank.core.domain.model.Cpf(cpf).valor();
     }
 }

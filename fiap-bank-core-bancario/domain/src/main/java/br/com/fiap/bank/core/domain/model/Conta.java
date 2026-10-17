@@ -8,9 +8,9 @@ public class Conta {
     private String numeroConta;
     private String agencia;
     private TipoConta tipoConta;
-    private BigDecimal saldo;
+    private Saldo saldo;
     private Long clienteId;
-    private boolean ativa;
+    private StatusConta status;
 
     public Conta() {
     }
@@ -23,33 +23,33 @@ public class Conta {
         this.numeroConta = numeroConta;
         this.agencia = agencia;
         this.tipoConta = tipoConta;
-        this.saldo = saldo;
+        this.saldo = new Saldo(saldo);
         this.clienteId = clienteId;
-        this.ativa = ativa;
+        this.status = ativa ? StatusConta.ATIVA : StatusConta.ENCERRADA;
     }
 
     public void depositar(BigDecimal valor) {
         validarMovimentacao(valor);
-        saldo = saldo.add(valor);
+        saldo = saldo.creditar(valor);
     }
 
     public void sacar(BigDecimal valor) {
         validarMovimentacao(valor);
 
-        if (saldo.compareTo(valor) < 0) {
+        if (saldo.valor().compareTo(valor) < 0) {
             throw new IllegalArgumentException(
                     "Saldo insuficiente para realizar o saque.");
         }
 
-        saldo = saldo.subtract(valor);
+        saldo = saldo.debitar(valor);
     }
 
     public void inativar() {
-        this.ativa = false;
+        this.status = StatusConta.ENCERRADA;
     }
 
     private void validarMovimentacao(BigDecimal valor) {
-        if (!ativa) {
+        if (status != StatusConta.ATIVA) {
             throw new IllegalStateException(
                     "Nao e permitido movimentar uma conta inativa.");
         }
@@ -98,7 +98,7 @@ public class Conta {
     }
 
     public BigDecimal getSaldo() {
-        return saldo;
+        return saldo.valor();
     }
 
     public Long getClienteId() {
@@ -110,6 +110,6 @@ public class Conta {
     }
 
     public boolean isAtiva() {
-        return ativa;
+        return status == StatusConta.ATIVA;
     }
 }
