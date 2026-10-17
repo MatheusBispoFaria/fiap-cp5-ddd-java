@@ -35,7 +35,8 @@
 
       <div class="balance-container">
         <span class="balance-label">Saldo em conta corrente</span>
-        <h2 class="balance-amount" *ngIf="!hideBalance">
+        <p *ngIf="erroCore" role="alert">{{erroCore}}</p>
+        <h2 class="balance-amount" *ngIf="!hideBalance && (contaInfo.statusConta === 'ATIVA' || contaInfo.statusConta === 'INATIVA')">
           R$ {{contaInfo.saldo | number:'1.2-2':'pt-BR'}}
         </h2>
         <h2 class="balance-amount hidden" *ngIf="hideBalance">
@@ -126,7 +127,7 @@
 
       <!-- Resumo de Extrato Recente -->
       <div class="section-header mt-4">
-        <h4>Últimas Movimentações</h4>
+        <h4>Movimentações demonstrativas</h4>
         <span class="see-all" (click)="setTab('extrato')">Ver Extrato</span>
       </div>
 
@@ -229,7 +230,7 @@
       <div class="simulation-card">
         <div class="sim-header">
           <i class="fa-solid fa-calculator text-red"></i>
-          <span>Simulação do Empréstimo</span>
+          <span>Simulação ilustrativa do Empréstimo</span>
         </div>
         <div class="sim-row">
           <span>Valor do Crédito:</span>
@@ -245,10 +246,11 @@
         </div>
       </div>
 
+      <p class="text-muted small">Estimativa ilustrativa com juros. A análise acadêmica de renda usa valor dividido pelas parcelas; aprovação não representa depósito na conta.</p>
       <!-- Submit Button -->
-      <button class="submit-btn" [disabled]="loading" (click)="solicitarCredito()">
-        <span *ngIf="!loading"><i class="fa-solid fa-paper-plane me-2"></i>Enviar Solicitação à Plataforma</span>
-        <span *ngIf="loading"><i class="fa-solid fa-spinner fa-spin me-2"></i>Processando proposta...</span>
+      <button class="submit-btn" [disabled]="enviando" (click)="solicitarCredito()">
+        <span *ngIf="!enviando"><i class="fa-solid fa-paper-plane me-2"></i>Enviar Solicitação à Plataforma</span>
+        <span *ngIf="enviando"><i class="fa-solid fa-spinner fa-spin me-2"></i>Processando proposta...</span>
       </button>
     </div>
 
@@ -256,7 +258,7 @@
     <div class="tab-content" *ngIf="activeTab === 'extrato'">
       <div class="form-title">
         <h2>Extrato de Conta Corrente</h2>
-        <p>Histórico completo de entradas, saídas e liberação de créditos.</p>
+        <p>Exemplo demonstrativo: estes lançamentos não são um extrato real da sua conta.</p>
       </div>
 
       <!-- Extrato Summary Cards -->
@@ -321,6 +323,7 @@
         </button>
       </div>
 
+      <p *ngIf="erroHistorico" role="alert">{{erroHistorico}}</p>
       <!-- List -->
       <div class="history-list mt-3">
         <div class="history-card" *ngFor="let sol of solicitacoes">
@@ -345,7 +348,7 @@
             </div>
             <div class="detail-col">
               <span>Score Risco</span>
-              <strong class="score-pill">{{sol.scoreBureau || 750}} pts</strong>
+              <strong class="score-pill">{{sol.scoreBureau ?? '—'}} pts</strong>
             </div>
           </div>
 
@@ -359,7 +362,7 @@
           </div>
         </div>
 
-        <div class="empty-state" *ngIf="solicitacoes.length === 0 && !loading">
+        <div class="empty-state" *ngIf="solicitacoes.length === 0 && !loading && !erroHistorico">
           <i class="fa-solid fa-file-invoice-dollar fs-1 text-muted mb-2"></i>
           <p>Nenhuma solicitação encontrada para o CPF informado.</p>
         </div>
@@ -392,7 +395,7 @@
 
         <div class="core-row">
           <span>Status da Conta:</span>
-          <span class="badge bg-success">{{contaInfo.statusConta}}</span>
+          <span class="badge" [ngClass]="contaInfo.statusConta === 'ATIVA' ? 'bg-success' : 'bg-warning'">{{contaInfo.statusConta}}</span>
         </div>
         <div class="core-row">
           <span>Agência Bancária:</span>
@@ -405,7 +408,7 @@
         <div class="core-row align-items-center">
           <span>Saldo Disponível no Core:</span>
           <!-- Exibição de Saldo respeitando a visibilidade do olho -->
-          <strong class="text-emerald fs-4" *ngIf="!hideBalance">
+          <strong class="text-emerald fs-4" *ngIf="!hideBalance && (contaInfo.statusConta === 'ATIVA' || contaInfo.statusConta === 'INATIVA')">
             R$ {{contaInfo.saldo | number:'1.2-2':'pt-BR'}}
           </strong>
           <strong class="text-muted fs-4" *ngIf="hideBalance">
@@ -415,7 +418,7 @@
 
         <div class="mt-3 p-3 rounded-3 bg-dark border border-secondary text-center small text-muted">
           <i class="fa-solid fa-shield-halved me-1 text-warning"></i>
-          Informações sincronizadas com a API RESTful do <strong>fiap-bank-core-bancario</strong>.
+          <button type="button" (click)="carregarDadosCore()">Atualizar dados da conta</button>
         </div>
       </div>
     </div>

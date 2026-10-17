@@ -19,7 +19,7 @@ export interface SolicitacaoCreditoResponse {
   status: 'EM_ANALISE' | 'APROVADO' | 'REPROVADO' | 'DOCUMENTACAO_PENDENTE';
   parecerOperador: string;
   scrRestricoes: boolean;
-  scoreBureau: number;
+  scoreBureau: number | null;
   dataSolicitacao: string;
   dataAtualizacao: string;
 }

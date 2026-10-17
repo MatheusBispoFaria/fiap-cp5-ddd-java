@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+registerLocaleData(localePt);
 import { FormsModule } from '@angular/forms';
 import { CreditoService } from './services/credito.service';
 import { ClienteCoreInfo, SolicitacaoCreditoResponse, TransacaoExtrato } from './models/credito.model';
@@ -15,6 +17,9 @@ export class AppComponent implements OnInit {
   activeTab: 'home' | 'credito' | 'extrato' | 'historico' | 'core' = 'home';
   hideBalance: boolean = false;
   loading: boolean = false;
+  enviando: boolean = false;
+  erroHistorico: string | null = null;
+  erroCore: string | null = null;
   feedbackMessage: string | null = null;
   feedbackType: 'success' | 'warning' | 'error' = 'success';
 
@@ -25,10 +30,10 @@ export class AppComponent implements OnInit {
 
   // Core Bank Account Info
   contaInfo: ClienteCoreInfo = {
-    statusConta: 'ATIVA',
-    saldo: 12500.00,
-    agencia: '0001',
-    numeroConta: '12345-6'
+    statusConta: 'CONSULTANDO',
+    saldo: 0,
+    agencia: '',
+    numeroConta: ''
   };
 
   // Form Credit Request State
@@ -96,19 +101,28 @@ export class AppComponent implements OnInit {
   }
 
   carregarDadosCore(): void {
-    this.creditoService.consultarCoreBancario(this.cpfCliente).subscribe({
+    this.erroCore = null;
+    this.contaInfo = { statusConta: 'CONSULTANDO', saldo: 0, agencia: '', numeroConta: '' };
+    const cpfConsultado = this.cpfCliente;
+    this.creditoService.consultarCoreBancario(cpfConsultado).subscribe({
       next: (info) => {
+        if (this.cpfCliente !== cpfConsultado) return;
+        if (info.statusConta === 'INDISPONIVEL') this.erroCore = 'Consulta da conta indisponível. Tente novamente.';
+        if (info.statusConta === 'SEM_CONTA') this.erroCore = 'Nenhuma conta encontrada para este CPF.';
         if (info && info.saldo !== undefined) {
           this.contaInfo = info;
         }
       },
       error: (err) => {
-        console.error('Erro ao consultar dados no Core Bancário via Plataforma:', err);
+        if (this.cpfCliente !== cpfConsultado) return;
+        this.contaInfo = { statusConta: 'INDISPONIVEL', saldo: 0, agencia: '', numeroConta: '' };
+        this.erroCore = 'Não foi possível consultar a conta. Tente novamente.';
       }
     });
   }
 
   carregarSolicitacoes(): void {
+    this.erroHistorico = null;
     this.loading = true;
     this.creditoService.consultarStatus(this.cpfCliente).subscribe({
       next: (data) => {
@@ -116,7 +130,7 @@ export class AppComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Erro ao buscar histórico de solicitações:', err);
+        this.erroHistorico = 'Não foi possível consultar suas solicitações. Tente novamente.';
         this.solicitacoes = [];
         this.loading = false;
       }
@@ -168,13 +182,21 @@ export class AppComponent implements OnInit {
   }
 
   solicitarCredito(): void {
-    if (!this.valorSolicitado || this.valorSolicitado <= 0) {
+    if (this.enviando) return;
+    if (!/^(\d{11}|\d{3}\.\d{3}\.\d{3}-\d{2})$/.test(this.cpfCliente)
+        || !this.nomeCliente.trim() || !Number.isFinite(this.rendaMensal) || this.rendaMensal <= 0
+        || !Number.isInteger(this.quantidadeParcelas) || this.quantidadeParcelas <= 0) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Informe CPF com 11 dígitos, nome, renda positiva e parcelas válidas.';
+      return;
+    }
+    if (!Number.isFinite(this.valorSolicitado) || this.valorSolicitado <= 0) {
       this.feedbackType = 'error';
       this.feedbackMessage = 'Por favor, informe um valor desejado válido para o crédito.';
       return;
     }
 
-    this.loading = true;
+    this.enviando = true;
     this.feedbackMessage = null;
 
     const payload = {
@@ -188,22 +210,12 @@ export class AppComponent implements OnInit {
 
     this.creditoService.solicitarCredito(payload).subscribe({
       next: (res) => {
-        this.loading = false;
+        this.enviando = false;
         if (res.status === 'APROVADO') {
           this.feedbackType = 'success';
           this.feedbackMessage = `Crédito de R$ ${this.valorSolicitado.toLocaleString('pt-BR')} APROVADO com sucesso!`;
           
-          // Adiciona lancamento no extrato
-          this.transacoes.unshift({
-            id: `TX-${Math.floor(Math.random() * 900) + 100}`,
-            descricao: `Crédito ${res.tipoCredito} Aprovado`,
-            tipo: 'ENTRADA',
-            categoria: 'CREDITO',
-            valor: res.valorSolicitado,
-            data: new Date().toISOString(),
-            icone: 'fa-hand-holding-dollar text-primary'
-          });
-          this.contaInfo.saldo += res.valorSolicitado;
+          this.carregarDadosCore();
         } else if (res.status === 'EM_ANALISE') {
           this.feedbackType = 'warning';
           this.feedbackMessage = `Sua solicitação de R$ ${this.valorSolicitado.toLocaleString('pt-BR')} foi encaminhada para a Mesa de Operações.`;
@@ -212,12 +224,12 @@ export class AppComponent implements OnInit {
           this.feedbackMessage = `Solicitação não aprovada: ${res.parecerOperador}`;
         }
         this.carregarSolicitacoes();
-        setTimeout(() => this.activeTab = 'historico', 1500);
+        this.activeTab = 'historico';
       },
       error: (err) => {
-        this.loading = false;
+        this.enviando = false;
         this.feedbackType = 'error';
-        this.feedbackMessage = 'Erro ao processar solicitação na Plataforma de Crédito. Verifique se o servidor backend está online.';
+        this.feedbackMessage = err.status === 400 ? 'Revise os dados da solicitação e tente novamente.' : 'Não foi possível enviar sua solicitação. Tente novamente em instantes.';
         console.error('Erro na solicitação de crédito:', err);
       }
     });
@@ -233,6 +245,7 @@ export class AppComponent implements OnInit {
 
   setTab(tab: 'home' | 'credito' | 'extrato' | 'historico' | 'core'): void {
     this.activeTab = tab;
+    if (tab === 'core' || tab === 'home') this.carregarDadosCore();
     if (tab === 'historico') {
       this.carregarSolicitacoes();
     }
