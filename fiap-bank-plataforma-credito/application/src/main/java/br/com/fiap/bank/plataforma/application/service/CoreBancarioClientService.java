@@ -1,4 +1,4 @@
-package br.com.fiap.bank.plataforma.service;
+package br.com.fiap.bank.plataforma.application.service;
 
 import br.com.fiap.bank.plataforma.client.CoreBancarioFeignClient;
 import org.springframework.stereotype.Service;

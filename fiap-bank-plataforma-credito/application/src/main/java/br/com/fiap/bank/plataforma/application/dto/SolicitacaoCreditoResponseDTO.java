@@ -1,7 +1,7 @@
-package br.com.fiap.bank.plataforma.dto;
+package br.com.fiap.bank.plataforma.application.dto;
 
-import br.com.fiap.bank.plataforma.model.SolicitacaoCredito;
-import br.com.fiap.bank.plataforma.model.StatusSolicitacao;
+import br.com.fiap.bank.plataforma.domain.model.SolicitacaoCredito;
+import br.com.fiap.bank.plataforma.domain.model.StatusSolicitacao;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

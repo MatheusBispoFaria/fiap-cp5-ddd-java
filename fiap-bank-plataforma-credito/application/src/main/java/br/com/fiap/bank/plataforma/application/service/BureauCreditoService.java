@@ -1,4 +1,4 @@
-package br.com.fiap.bank.plataforma.service;
+package br.com.fiap.bank.plataforma.application.service;
 
 import org.springframework.stereotype.Service;
 
