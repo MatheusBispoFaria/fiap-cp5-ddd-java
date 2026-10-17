@@ -1,9 +1,9 @@
-package br.com.fiap.bank.plataforma.application.service;
+package br.com.fiap.bank.plataforma.infrastructure.client;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public class BureauCreditoService {
+public class BureauCreditoClient {
 
     /**
      * Consulta o Bureau de Credito (Serasa/SPC) para obter o Score de Risco do cliente (0-1000).

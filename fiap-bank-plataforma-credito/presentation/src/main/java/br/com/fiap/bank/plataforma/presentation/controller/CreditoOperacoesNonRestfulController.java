@@ -8,6 +8,7 @@ import br.com.fiap.bank.plataforma.application.service.PlataformaCreditoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class CreditoOperacoesNonRestfulController {
     // Criar solicitacao de credito
     @PostMapping("/solicitarCredito")
     public ResponseEntity<SolicitacaoCreditoResponseDTO> solicitarCredito(
-            @RequestBody SolicitarCreditoRequest request) {
+            @Valid @RequestBody SolicitarCreditoRequest request) {
 
         return ResponseEntity.ok(
                 plataformaService.solicitarCredito(request)
@@ -40,7 +41,7 @@ public class CreditoOperacoesNonRestfulController {
     // Consultar status por CPF
     @PostMapping("/consultarStatusCredito")
     public ResponseEntity<List<SolicitacaoCreditoResponseDTO>> consultarStatusCredito(
-            @RequestBody ConsultarStatusRequest request) {
+            @Valid @RequestBody ConsultarStatusRequest request) {
 
         return ResponseEntity.ok(
                 plataformaService.consultarStatusPorCpf(request)
@@ -50,7 +51,7 @@ public class CreditoOperacoesNonRestfulController {
     // Buscar solicitacao por ID
     @PostMapping("/buscarSolicitacaoPorId")
     public ResponseEntity<SolicitacaoCreditoResponseDTO> buscarSolicitacaoPorId(
-            @RequestBody BuscarSolicitacaoRequest request) {
+            @Valid @RequestBody BuscarSolicitacaoRequest request) {
 
         return ResponseEntity.ok(
                 plataformaService.buscarPorId(request)
@@ -69,7 +70,7 @@ public class CreditoOperacoesNonRestfulController {
     // Aprovar solicitacao
     @PostMapping("/aprovarSolicitacao")
     public ResponseEntity<SolicitacaoCreditoResponseDTO> aprovarSolicitacao(
-            @RequestBody AprovarSolicitacaoRequest request) {
+            @Valid @RequestBody AprovarSolicitacaoRequest request) {
 
         return ResponseEntity.ok(
                 plataformaService.aprovarSolicitacao(request)
@@ -79,7 +80,7 @@ public class CreditoOperacoesNonRestfulController {
     // Reprovar solicitacao
     @PostMapping("/reprovarSolicitacao")
     public ResponseEntity<SolicitacaoCreditoResponseDTO> reprovarSolicitacao(
-            @RequestBody ReprovarSolicitacaoRequest request) {
+            @Valid @RequestBody ReprovarSolicitacaoRequest request) {
 
         return ResponseEntity.ok(
                 plataformaService.reprovarSolicitacao(request)
@@ -89,7 +90,7 @@ public class CreditoOperacoesNonRestfulController {
     // Consultar dados do cliente no Core Bancario
     @PostMapping("/consultarClienteCore")
     public ResponseEntity<Map<String, Object>> consultarClienteCore(
-            @RequestBody ConsultarStatusRequest request) {
+            @Valid @RequestBody ConsultarStatusRequest request) {
 
         return ResponseEntity.ok(
                 coreBancarioClientService.consultarContaCliente(

@@ -1,9 +1,9 @@
-package br.com.fiap.bank.plataforma.application.service;
+package br.com.fiap.bank.plataforma.infrastructure.client;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public class ScrService {
+public class ScrClient {
 
     /**
      * Consulta o Sistema do Banco Central (SCR) para verificar se o cliente possui restricoes ou dividas vencidas.

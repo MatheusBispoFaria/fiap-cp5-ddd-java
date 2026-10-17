@@ -13,7 +13,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@RestControllerAdvice(assignableTypes = CreditoRestController.class)
+@RestControllerAdvice
 public class CreditoRestExceptionHandler {
 
         @ExceptionHandler(MethodArgumentNotValidException.class)

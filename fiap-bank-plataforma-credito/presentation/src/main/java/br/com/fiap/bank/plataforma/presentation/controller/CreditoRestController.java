@@ -59,36 +59,12 @@ public class CreditoRestController {
         );
     }
 
-    @PatchMapping("/{id}/aprovar")
-    public ResponseEntity<SolicitacaoCreditoResponseDTO> aprovar(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> dados) {
-
-        AprovarSolicitacaoRequest request =
-                new AprovarSolicitacaoRequest(
-                        id,
-                        dados.get("parecerOperador")
-                );
-
-        return ResponseEntity.ok(
-                service.aprovarSolicitacao(request)
-        );
+    @PutMapping("/{id}/status")
+    public ResponseEntity<SolicitacaoCreditoResponseDTO> atualizarStatus(
+            @PathVariable Long id, @Valid @RequestBody AtualizarStatusRequest request) {
+        if ("APROVADO".equals(request.status())) {
+            return ResponseEntity.ok(service.aprovarSolicitacao(new AprovarSolicitacaoRequest(id, request.parecerOperador())));
+        }
+        return ResponseEntity.ok(service.reprovarSolicitacao(new ReprovarSolicitacaoRequest(id, request.parecerOperador())));
     }
-
-    @PatchMapping("/{id}/reprovar")
-    public ResponseEntity<SolicitacaoCreditoResponseDTO> reprovar(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> dados) {
-
-        ReprovarSolicitacaoRequest request =
-                new ReprovarSolicitacaoRequest(
-                        id,
-                        dados.get("motivoReprovacao")
-                );
-
-        return ResponseEntity.ok(
-                service.reprovarSolicitacao(request)
-        );
-    }
-
 }

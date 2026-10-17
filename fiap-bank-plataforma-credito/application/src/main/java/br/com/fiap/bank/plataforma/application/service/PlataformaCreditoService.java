@@ -7,6 +7,9 @@ import br.com.fiap.bank.plataforma.domain.repository.SolicitacaoCreditoRepositor
 import br.com.fiap.bank.plataforma.application.exception.SolicitacaoNaoEncontradaException;
 
 import org.springframework.stereotype.Service;
+import br.com.fiap.bank.plataforma.infrastructure.client.NotificacaoClient;
+import br.com.fiap.bank.plataforma.infrastructure.client.BureauCreditoClient;
+import br.com.fiap.bank.plataforma.infrastructure.client.ScrClient;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -18,20 +21,23 @@ import java.util.List;
 public class PlataformaCreditoService {
 
     private final SolicitacaoCreditoRepository repository;
-    private final ScrService scrService;
-    private final BureauCreditoService bureauService;
-    private final NotificacaoService notificacaoService;
+    private final ScrClient scrService;
+    private final br.com.fiap.bank.plataforma.infrastructure.client.CrmClient crmClient;
+    private final BureauCreditoClient bureauService;
+    private final NotificacaoClient notificacaoService;
     private final CoreBancarioClientService coreBancarioClientService;
 
     public PlataformaCreditoService(
             SolicitacaoCreditoRepository repository,
-            ScrService scrService,
-            BureauCreditoService bureauService,
-            NotificacaoService notificacaoService,
+            ScrClient scrService,
+            br.com.fiap.bank.plataforma.infrastructure.client.CrmClient crmClient,
+            BureauCreditoClient bureauService,
+            NotificacaoClient notificacaoService,
             CoreBancarioClientService coreBancarioClientService) {
 
         this.repository = repository;
         this.scrService = scrService;
+        this.crmClient = crmClient;
         this.bureauService = bureauService;
         this.notificacaoService = notificacaoService;
         this.coreBancarioClientService = coreBancarioClientService;
@@ -60,50 +66,10 @@ public class PlataformaCreditoService {
         // 3. Consulta Core Bancario
         coreBancarioClientService.consultarContaCliente(cpfLimpo);
 
-        // 4. Motor de Regras de Credito
-        StatusSolicitacao status;
-        String parecer;
-
-        if (temRestricaoScr) {
-
-            status = StatusSolicitacao.REPROVADO;
-            parecer = "Solicitacao reprovada automaticamente devido "
-                    + "a restricoes ativas no SCR (Banco Central).";
-
-        } else if (scoreBureau < 500) {
-
-            status = StatusSolicitacao.REPROVADO;
-            parecer = "Solicitacao reprovada automaticamente. "
-                    + "Score no Bureau de Credito insuficiente ("
-                    + scoreBureau + ").";
-
-        } else {
-
-            BigDecimal parcelaEstimada =
-                    request.valorSolicitado().divide(
-                            BigDecimal.valueOf(request.quantidadeParcelas()),
-                            2,
-                            RoundingMode.HALF_UP
-                    );
-
-            BigDecimal trintaPercentoRenda =
-                    request.rendaMensal()
-                            .multiply(new BigDecimal("0.30"));
-
-            if (parcelaEstimada.compareTo(trintaPercentoRenda) > 0) {
-
-                status = StatusSolicitacao.EM_ANALISE;
-                parecer = "Encaminhado para a Mesa de Operacoes de Credito. "
-                        + "Parcela estimada (R$ " + parcelaEstimada
-                        + ") compromete mais de 30% da renda informada.";
-
-            } else {
-
-                status = StatusSolicitacao.APROVADO;
-                parecer = "Solicitacao aprovada automaticamente "
-                        + "pelo Motor de Credito FIAP Bank!";
-            }
-        }
+        var decisao = br.com.fiap.bank.plataforma.domain.model.MotorCredito.analisar(
+                temRestricaoScr, scoreBureau, request.valorSolicitado(), request.quantidadeParcelas(), request.rendaMensal());
+        StatusSolicitacao status = decisao.status();
+        String parecer = decisao.parecer() + " CRM: " + crmClient.consultarHistorico(cpfLimpo) + ".";
 
         LocalDateTime agora = LocalDateTime.now();
 
@@ -176,10 +142,11 @@ public class PlataformaCreditoService {
 
         SolicitacaoCredito solicitacao =
                 repository.buscarPorId(request.solicitacaoId())
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Solicitacao de credito nao encontrada com ID: "
-                                        + request.solicitacaoId()
-                        ));
+                        .orElseThrow(() -> new SolicitacaoNaoEncontradaException(request.solicitacaoId()));
+
+        if (solicitacao.getStatus() != StatusSolicitacao.EM_ANALISE) {
+            throw new IllegalArgumentException("Esta solicitacao ja foi finalizada.");
+        }
 
         solicitacao.setStatus(StatusSolicitacao.APROVADO);
 
@@ -210,10 +177,11 @@ public class PlataformaCreditoService {
 
         SolicitacaoCredito solicitacao =
                 repository.buscarPorId(request.solicitacaoId())
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Solicitacao de credito nao encontrada com ID: "
-                                        + request.solicitacaoId()
-                        ));
+                        .orElseThrow(() -> new SolicitacaoNaoEncontradaException(request.solicitacaoId()));
+
+        if (solicitacao.getStatus() != StatusSolicitacao.EM_ANALISE) {
+            throw new IllegalArgumentException("Esta solicitacao ja foi finalizada.");
+        }
 
         solicitacao.setStatus(StatusSolicitacao.REPROVADO);
 

@@ -2,6 +2,9 @@ package br.com.fiap.bank.plataforma.application.service;
 
 import br.com.fiap.bank.plataforma.infrastructure.client.CoreBancarioFeignClient;
 import org.springframework.stereotype.Service;
+import feign.FeignException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,6 +13,7 @@ import java.util.Objects;
 
 @Service
 public class CoreBancarioClientService {
+    private static final Logger log = LoggerFactory.getLogger(CoreBancarioClientService.class);
 
     private final CoreBancarioFeignClient coreBancarioFeignClient;
 
@@ -18,11 +22,15 @@ public class CoreBancarioClientService {
         this.coreBancarioFeignClient = coreBancarioFeignClient;
     }
 
-    /**x'
+    /**
      * Consulta as contas do cliente no Core Bancario via OpenFeign.
      * Mantem o formato de resposta usado pela Plataforma de Credito.
      */
     public Map<String, Object> consultarContaCliente(String cpf) {
+        if (cpf == null || !cpf.matches("^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})$")) {
+            throw new IllegalArgumentException("O CPF deve possuir 11 digitos.");
+        }
+        cpf = cpf.replaceAll("\\D", "");
         try {
             List<Map<String, Object>> contas =
                     coreBancarioFeignClient.consultarContaCliente(cpf);
@@ -50,14 +58,10 @@ public class CoreBancarioClientService {
                             conta.get("numeroConta"), "")
             );
 
-        } catch (Exception e) {
-            System.err.println(
-                    "[CORE BANCARIO CLIENT] Falha ao consultar CPF "
-                            + cpf + ": " + e.getMessage()
-            );
-
-            e.printStackTrace();
-
+        } catch (FeignException.NotFound e) {
+            return respostaSemConta("SEM_CONTA");
+        } catch (FeignException e) {
+            log.warn("Falha na consulta ao Core Bancario (HTTP {}).", e.status());
             return respostaSemConta("INDISPONIVEL");
         }
     }

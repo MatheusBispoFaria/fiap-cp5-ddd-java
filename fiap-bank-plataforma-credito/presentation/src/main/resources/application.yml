@@ -1,7 +1,14 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          coreBancarioClient:
+            connectTimeout: 2000
+            readTimeout: 3000
   application:
     name: fiap-bank-plataforma-credito
   datasource:
@@ -21,4 +28,4 @@ spring:
 
 core:
   bancario:
-    url: ${CORE_BANCARIO_URL:http://localhost:8080/api/v1}
+    url: ${CORE_BANCARIO_URL:http://localhost:8081/api/v1}

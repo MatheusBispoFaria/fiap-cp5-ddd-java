@@ -1,14 +1,14 @@
-package br.com.fiap.bank.plataforma.application.service;
+package br.com.fiap.bank.plataforma.infrastructure.client;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotificacaoService {
+public class NotificacaoClient {
 
     /**
      * Envia notificacao externa via SMS/Email para o cliente sobre a atualizacao do status do credito.
      */
     public void enviarNotificacao(String cpf, String mensagem) {
-        System.out.println("[SISTEMA DE NOTIFICACOES] Notificacao enviada para CPF " + cpf + ": " + mensagem);
+        System.out.println("[SISTEMA DE NOTIFICACOES] SIMULACAO de notificacao para CPF " + cpf + ": " + mensagem);
     }
 }
