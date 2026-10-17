@@ -1,6 +1,6 @@
 package br.com.fiap.bank.plataforma.application.service;
 
-import br.com.fiap.bank.plataforma.client.CoreBancarioFeignClient;
+import br.com.fiap.bank.plataforma.infrastructure.client.CoreBancarioFeignClient;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -57,4 +58,37 @@ public class CreditoRestController {
                 )
         );
     }
+
+    @PatchMapping("/{id}/aprovar")
+    public ResponseEntity<SolicitacaoCreditoResponseDTO> aprovar(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> dados) {
+
+        AprovarSolicitacaoRequest request =
+                new AprovarSolicitacaoRequest(
+                        id,
+                        dados.get("parecerOperador")
+                );
+
+        return ResponseEntity.ok(
+                service.aprovarSolicitacao(request)
+        );
+    }
+
+    @PatchMapping("/{id}/reprovar")
+    public ResponseEntity<SolicitacaoCreditoResponseDTO> reprovar(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> dados) {
+
+        ReprovarSolicitacaoRequest request =
+                new ReprovarSolicitacaoRequest(
+                        id,
+                        dados.get("motivoReprovacao")
+                );
+
+        return ResponseEntity.ok(
+                service.reprovarSolicitacao(request)
+        );
+    }
+
 }

@@ -4,6 +4,7 @@ import br.com.fiap.bank.plataforma.application.dto.*;
 import br.com.fiap.bank.plataforma.domain.model.SolicitacaoCredito;
 import br.com.fiap.bank.plataforma.domain.model.StatusSolicitacao;
 import br.com.fiap.bank.plataforma.domain.repository.SolicitacaoCreditoRepository;
+import br.com.fiap.bank.plataforma.application.exception.SolicitacaoNaoEncontradaException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -153,9 +154,8 @@ public class PlataformaCreditoService {
 
         SolicitacaoCredito solicitacao =
                 repository.buscarPorId(request.solicitacaoId())
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Solicitacao nao encontrada com ID: "
-                                        + request.solicitacaoId()
+                        .orElseThrow(() -> new SolicitacaoNaoEncontradaException(
+                                request.solicitacaoId()
                         ));
 
         return SolicitacaoCreditoResponseDTO.fromEntity(solicitacao);
